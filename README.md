@@ -1,24 +1,60 @@
 # Kafka Consumer - Contas a Pagar
 
-Consumidor Kafka em Java/Spring Boot responsável por receber eventos do tópico `contas-pagar-topic` e persisti-los no banco PostgreSQL de contas a pagar.
+> Consumer Kafka em Java/Spring Boot para leitura de eventos financeiros e persistência no PostgreSQL.
 
-## 📋 Pré-requisitos
+[![Java](https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white)](https://openjdk.org/)
+[![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
+[![Kafka](https://img.shields.io/badge/Apache-Kafka-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+
+---
+
+## 📑 Sumário
+
+- [Visão geral](#-visão-geral)
+- [Infraestrutura oficial](#-infraestrutura-oficial)
+- [Estrutura do projeto](#-estrutura-do-projeto)
+- [Como executar](#-como-executar)
+- [Configuração](#-configuração)
+- [Formato da mensagem](#-formato-da-mensagem)
+- [Teste local](#-teste-local)
+- [Funcionalidades](#-funcionalidades)
+
+---
+
+## 🌐 Visão geral
+
+Responsável por consumir mensagens de `contas-pagar-topic` e salvar os dados na tabela `contas_pagar`.
+
+## 🔗 Infraestrutura oficial
+
+Este projeto **não possui infraestrutura própria**. Utilize:
+
+- [danielsmanioto/infra-gerenciador-pessoal](https://github.com/danielsmanioto/infra-gerenciador-pessoal)
+
+## 🗂 Estrutura do projeto
+
+```text
+kafka-consumer-contas-pagar/
+├── src/
+│   ├── main/
+│   │   ├── java/com/danielsmanioto/kafka/consumer/
+│   │   └── resources/
+│   └── test/
+│       └── java/com/danielsmanioto/kafka/consumer/
+├── pom.xml
+└── README.md
+```
+
+## 🚀 Como executar
+
+### 1) Pré-requisitos
 
 - Java 17
 - Maven 3.8+
 - Docker e Docker Compose
 
-## 🔗 Infraestrutura oficial
-
-Este projeto **não mantém mais infraestrutura própria**.
-
-Toda a infraestrutura local foi centralizada em:
-
-- [danielsmanioto/infra-gerenciador-pessoal](https://github.com/danielsmanioto/infra-gerenciador-pessoal)
-
-## 🚀 Como executar
-
-### 1. Suba a infraestrutura centralizada
+### 2) Subir infraestrutura centralizada
 
 ```bash
 git clone https://github.com/danielsmanioto/infra-gerenciador-pessoal.git
@@ -26,28 +62,21 @@ cd infra-gerenciador-pessoal
 docker compose up -d
 ```
 
-### 2. Volte para este projeto e compile
+### 3) Compilar e executar consumer
 
 ```bash
 cd ../kafka-consumer-contas-pagar
 mvn clean install
-```
-
-### 3. Execute a aplicação
-
-```bash
 mvn spring-boot:run
 ```
 
-Ou via JAR:
+Ou:
 
 ```bash
 java -jar target/kafka-consumer-contas-pagar-1.0.0.jar
 ```
 
 ## ⚙️ Configuração
-
-O arquivo `src/main/resources/application.properties` usa variáveis de ambiente com fallback local:
 
 ```properties
 spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
@@ -61,8 +90,6 @@ spring.datasource.password=${CONTASPAGAR_DB_PASSWORD:postgres}
 
 ## 📨 Formato da mensagem
 
-O consumidor espera JSON com a seguinte estrutura:
-
 ```json
 {
   "centro_custo_id": 1,
@@ -74,9 +101,9 @@ O consumidor espera JSON com a seguinte estrutura:
 }
 ```
 
-## 🧪 Testando localmente
+## 🧪 Teste local
 
-### 1. Produza uma mensagem no tópico
+Produza uma mensagem manualmente:
 
 ```bash
 docker exec -it infra-gerenciador-kafka kafka-console-producer \
@@ -84,7 +111,7 @@ docker exec -it infra-gerenciador-kafka kafka-console-producer \
   --bootstrap-server localhost:9092
 ```
 
-### 2. Consulte o banco do consumer
+Consulte o banco:
 
 ```bash
 docker exec -it infra-gerenciador-postgres-consumer psql -U postgres -d contaspagar
@@ -94,25 +121,12 @@ docker exec -it infra-gerenciador-postgres-consumer psql -U postgres -d contaspa
 SELECT * FROM contas_pagar;
 ```
 
-## 📝 Funcionalidades
+## ✅ Funcionalidades
 
-- ✅ Consumo de mensagens do Kafka
-- ✅ Persistência em PostgreSQL
-- ✅ Commit manual de mensagens
-- ✅ Tratamento de erros com logs
-- ✅ Reprocessamento em caso de falha
-
-## 🏗️ Estrutura do projeto
-
-```
-src/main/java/com/danielsmanioto/kafka/consumer/
-├── KafkaConsumerApplication.java
-├── config/
-├── consumer/
-├── dto/
-├── entity/
-└── repository/
-```
+- Consumo contínuo de mensagens Kafka
+- Persistência em PostgreSQL
+- Confirmação manual de offset
+- Logs para monitoramento de processamento
 
 ## 📄 Licença
 
