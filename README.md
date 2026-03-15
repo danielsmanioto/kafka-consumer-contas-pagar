@@ -1,85 +1,67 @@
 # Kafka Consumer - Contas a Pagar
 
-Este projeto é um consumidor Kafka desenvolvido em Java 17 que recebe mensagens de um tópico Kafka e insere os registros no banco de dados PostgreSQL na tabela `contas_pagar`.
+Consumidor Kafka em Java/Spring Boot responsável por receber eventos do tópico `contas-pagar-topic` e persisti-los no banco PostgreSQL de contas a pagar.
 
 ## 📋 Pré-requisitos
 
 - Java 17
 - Maven 3.8+
-- Docker e Docker Compose (para ambiente local)
+- Docker e Docker Compose
 
-## 🚀 Tecnologias Utilizadas
+## 🔗 Infraestrutura oficial
 
-- **Java 17**
-- **Spring Boot 3.2.1**
-- **Spring Kafka** - Para consumir mensagens do Kafka
-- **Spring Data JPA** - Para persistência no banco de dados
-- **PostgreSQL** - Banco de dados
-- **Lombok** - Para reduzir código boilerplate
-- **Jackson** - Para deserialização de JSON
+Este projeto **não mantém mais infraestrutura própria**.
 
-## 📊 Estrutura da Tabela
+Toda a infraestrutura local foi centralizada em:
 
-```sql
-CREATE TABLE contas_pagar (
-    id BIGSERIAL PRIMARY KEY,
-    centro_custo_id BIGINT NOT NULL,
-    valor_previsto DECIMAL(15,2),
-    valor_pago DECIMAL(15,2),
-    status VARCHAR(50),
-    data_conta DATE,
-    informacao VARCHAR(500)
-);
-```
+- [danielsmanioto/infra-gerenciador-pessoal](https://github.com/danielsmanioto/infra-gerenciador-pessoal)
 
-## 🔧 Configuração
+## 🚀 Como executar
 
-### 1. Subir o ambiente local (Kafka + PostgreSQL)
+### 1. Suba a infraestrutura centralizada
 
 ```bash
-docker-compose up -d
+git clone https://github.com/danielsmanioto/infra-gerenciador-pessoal.git
+cd infra-gerenciador-pessoal
+docker compose up -d
 ```
 
-Isso irá iniciar:
-- Zookeeper (porta 2181)
-- Kafka (porta 9092)
-- PostgreSQL (porta 5432)
-
-### 2. Configurar o application.properties
-
-O arquivo `src/main/resources/application.properties` já contém as configurações padrão:
-
-```properties
-spring.kafka.bootstrap-servers=localhost:9092
-spring.kafka.consumer.group-id=contas-pagar-consumer-group
-kafka.topic.contas-pagar=contas-pagar-topic
-
-spring.datasource.url=jdbc:postgresql://localhost:5432/contaspagar
-spring.datasource.username=postgres
-spring.datasource.password=postgres
-```
-
-### 3. Compilar o projeto
+### 2. Volte para este projeto e compile
 
 ```bash
+cd ../kafka-consumer-contas-pagar
 mvn clean install
 ```
 
-### 4. Executar a aplicação
+### 3. Execute a aplicação
 
 ```bash
 mvn spring-boot:run
 ```
 
-Ou executar o JAR:
+Ou via JAR:
 
 ```bash
 java -jar target/kafka-consumer-contas-pagar-1.0.0.jar
 ```
 
-## 📨 Formato da Mensagem Kafka
+## ⚙️ Configuração
 
-O consumidor espera mensagens em formato JSON com a seguinte estrutura:
+O arquivo `src/main/resources/application.properties` usa variáveis de ambiente com fallback local:
+
+```properties
+spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+spring.kafka.consumer.group-id=${KAFKA_CONSUMER_GROUP_ID:contas-pagar-consumer-group}
+kafka.topic.contas-pagar=${KAFKA_TOPIC_CONTAS_PAGAR:contas-pagar-topic}
+
+spring.datasource.url=${CONTASPAGAR_DB_URL:jdbc:postgresql://localhost:5433/contaspagar}
+spring.datasource.username=${CONTASPAGAR_DB_USERNAME:postgres}
+spring.datasource.password=${CONTASPAGAR_DB_PASSWORD:postgres}
+```
+
+## 📨 Formato da mensagem
+
+O consumidor espera JSON com a seguinte estrutura:
 
 ```json
 {
@@ -92,85 +74,44 @@ O consumidor espera mensagens em formato JSON com a seguinte estrutura:
 }
 ```
 
-## 🧪 Testando o Consumidor
+## 🧪 Testando localmente
 
-### 1. Criar o tópico Kafka
-
-```bash
-docker exec -it kafka kafka-topics --create \
-  --topic contas-pagar-topic \
-  --bootstrap-server localhost:9092 \
-  --partitions 1 \
-  --replication-factor 1
-```
-
-### 2. Produzir mensagens de teste
+### 1. Produza uma mensagem no tópico
 
 ```bash
-docker exec -it kafka kafka-console-producer \
+docker exec -it infra-gerenciador-kafka kafka-console-producer \
   --topic contas-pagar-topic \
   --bootstrap-server localhost:9092
 ```
 
-Cole a mensagem JSON de exemplo:
-
-```json
-{"centro_custo_id": 100, "valor_previsto": 2500.00, "valor_pago": 2500.00, "status": "PAGO", "data_conta": "2024-01-15", "informacao": "Teste de pagamento"}
-```
-
-### 3. Verificar no banco de dados
+### 2. Consulte o banco do consumer
 
 ```bash
-docker exec -it postgres psql -U postgres -d contaspagar
+docker exec -it infra-gerenciador-postgres-consumer psql -U postgres -d contaspagar
 ```
 
 ```sql
 SELECT * FROM contas_pagar;
 ```
 
-## 🏗️ Estrutura do Projeto
-
-```
-src/main/java/com/danielsmanioto/kafka/consumer/
-├── KafkaConsumerApplication.java    # Classe principal
-├── config/
-│   └── KafkaConsumerConfig.java     # Configuração do Kafka
-├── consumer/
-│   └── ContasPagarConsumer.java     # Consumidor Kafka
-├── dto/
-│   └── ContasPagarDTO.java          # DTO para mensagens
-├── entity/
-│   └── ContasPagar.java             # Entidade JPA
-└── repository/
-    └── ContasPagarRepository.java   # Repositório JPA
-```
-
 ## 📝 Funcionalidades
 
-- ✅ Consumo de mensagens do tópico Kafka
-- ✅ Deserialização automática de JSON para objetos Java
-- ✅ Persistência no banco de dados PostgreSQL
-- ✅ Confirmação manual de mensagens (manual commit)
+- ✅ Consumo de mensagens do Kafka
+- ✅ Persistência em PostgreSQL
+- ✅ Commit manual de mensagens
 - ✅ Tratamento de erros com logs
 - ✅ Reprocessamento em caso de falha
 
-## 🔍 Logs
+## 🏗️ Estrutura do projeto
 
-A aplicação registra:
-- Mensagens recebidas do Kafka
-- Registros inseridos no banco de dados (com ID)
-- Erros durante o processamento
-
-## 🛑 Parar o ambiente
-
-```bash
-docker-compose down
 ```
-
-Para remover os volumes também:
-
-```bash
-docker-compose down -v
+src/main/java/com/danielsmanioto/kafka/consumer/
+├── KafkaConsumerApplication.java
+├── config/
+├── consumer/
+├── dto/
+├── entity/
+└── repository/
 ```
 
 ## 📄 Licença
