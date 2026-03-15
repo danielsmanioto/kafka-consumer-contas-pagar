@@ -1,10 +1,13 @@
 package com.danielsmanioto.kafka.consumer.dto;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ContasPagarDTO {
 
     private Long id;
@@ -21,8 +24,10 @@ public class ContasPagarDTO {
     private String status;
 
     @JsonProperty("data_conta")
+    @JsonAlias("data")
     private LocalDate dataConta;
 
+    @JsonAlias("informacao_pagamento")
     private String informacao;
 
     public ContasPagarDTO() {
