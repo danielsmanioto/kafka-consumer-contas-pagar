@@ -34,7 +34,7 @@ public class ContasPagarConsumer {
                 .centroCustoId(dto.getCentroCustoId())
                 .valorPrevisto(dto.getValorPrevisto())
                 .valorPago(dto.getValorPago())
-                .status(dto.getStatus())
+                .status(normalizeStatus(dto.getStatus()))
                 .dataConta(dto.getDataConta())
                 .informacao(dto.getInformacao())
                 .build();
@@ -48,5 +48,12 @@ public class ContasPagarConsumer {
             log.error("Erro ao processar mensagem: {}", message, e);
             // Não faz acknowledge em caso de erro, permitindo reprocessamento
         }
+    }
+
+    private String normalizeStatus(String rawStatus) {
+        if (rawStatus == null) {
+            return null;
+        }
+        return rawStatus.trim().toUpperCase();
     }
 }

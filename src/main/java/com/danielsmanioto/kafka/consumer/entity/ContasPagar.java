@@ -28,7 +28,7 @@ public class ContasPagar {
     @Column(name = "data_conta")
     private LocalDate dataConta;
 
-    @Column(name = "informacao", length = 500)
+    @Column(name = "informacao_pagamento", length = 500)
     private String informacao;
 
     public ContasPagar() {

@@ -5,7 +5,7 @@
 [![Java](https://img.shields.io/badge/Java-17-007396?logo=openjdk&logoColor=white)](https://openjdk.org/)
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-3.x-6DB33F?logo=springboot&logoColor=white)](https://spring.io/projects/spring-boot)
 [![Kafka](https://img.shields.io/badge/Apache-Kafka-231F20?logo=apachekafka&logoColor=white)](https://kafka.apache.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql&logoColor=white)](https://www.postgresql.org/)
 
 ---
 
@@ -25,6 +25,8 @@
 ## 🌐 Visão geral
 
 Responsável por consumir mensagens de `contas-pagar-topic` e salvar os dados na tabela `contas_pagar`.
+
+> Este consumer usa o **mesmo banco** do projeto `gerenciador-pessoal` (`gerenciador_pessoal`).
 
 ## 🔗 Infraestrutura oficial
 
@@ -83,9 +85,9 @@ spring.kafka.bootstrap-servers=${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
 spring.kafka.consumer.group-id=${KAFKA_CONSUMER_GROUP_ID:contas-pagar-consumer-group}
 kafka.topic.contas-pagar=${KAFKA_TOPIC_CONTAS_PAGAR:contas-pagar-topic}
 
-spring.datasource.url=${CONTASPAGAR_DB_URL:jdbc:postgresql://localhost:5433/contaspagar}
-spring.datasource.username=${CONTASPAGAR_DB_USERNAME:postgres}
-spring.datasource.password=${CONTASPAGAR_DB_PASSWORD:postgres}
+spring.datasource.url=${GERENCIADOR_DB_URL:jdbc:postgresql://localhost:5432/gerenciador_pessoal}
+spring.datasource.username=${GERENCIADOR_DB_USERNAME:gerenciador}
+spring.datasource.password=${GERENCIADOR_DB_PASSWORD:gerenciador123}
 ```
 
 ## 📨 Formato da mensagem
@@ -114,7 +116,7 @@ docker exec -it infra-gerenciador-kafka kafka-console-producer \
 Consulte o banco:
 
 ```bash
-docker exec -it infra-gerenciador-postgres-consumer psql -U postgres -d contaspagar
+docker exec -it infra-gerenciador-postgres-app psql -U gerenciador -d gerenciador_pessoal
 ```
 
 ```sql
